@@ -106,14 +106,22 @@ def animate_spiral_chart(df, duration=10, fps=60, pause_duration=1):
     # Initialize empty plot for animation
     line, = ax.plot([], [], lw=0.75, color='blue')
 
-    # Initialize markers as empty for now
-    halving_markers, = ax.plot([], [], 'ks', markersize=10, label='Halving Events')  # Black squares for halvings
-    all_time_high_markers, = ax.plot([], [], 'bo', markersize=10, markerfacecolor='none', label='All-time Highs')  # Blue circle
-    cycle_high_markers, = ax.plot([], [], 'g^', markersize=10, label='Cycle Highs')  # Green triangle
-    cycle_low_markers, = ax.plot([], [], 'ro', markersize=10, label='Cycle Lows')  # Red circle
+    # Initialize individual halving markers and labels
+    halving_markers = []
+    halving_labels = ['1st Halving (2012-11-28)', '2nd Halving (2016-07-09)', '3rd Halving (2020-05-11)', '4th Halving (2024-04-20)']
 
-    # Add a legend
-    ax.legend(loc='upper left', bbox_to_anchor=(-0.1, 1.1))
+    for i, halving_date in enumerate(halving_dates):
+        # Create a marker for each halving
+        halving_marker, = ax.plot([], [], 'ks', markersize=10, label=halving_labels[i])
+        halving_markers.append(halving_marker)
+
+    # Initialize markers for other key points
+    all_time_high_markers, = ax.plot([], [], 'bo', markersize=10, markerfacecolor='none', label='All-Time High')
+    cycle_high_markers, = ax.plot([], [], '^', markersize=10, color='orange', label='Cycle High')  
+    cycle_low_markers, = ax.plot([], [], 'ro', markersize=10, label='Cycle Low')
+
+    # Add a legend with all the markers
+    ax.legend(loc='upper left', bbox_to_anchor=(-0.2, 1))
 
     # Convert price to log10 for scaling
     r = np.log10(df['Close'])
@@ -121,11 +129,12 @@ def animate_spiral_chart(df, duration=10, fps=60, pause_duration=1):
     def init():
         """Initialize the background of the plot."""
         line.set_data([], [])
-        halving_markers.set_data([], [])
+        for marker in halving_markers:
+            marker.set_data([], [])
         all_time_high_markers.set_data([], [])
         cycle_high_markers.set_data([], [])
         cycle_low_markers.set_data([], [])
-        return line, halving_markers, all_time_high_markers, cycle_high_markers, cycle_low_markers
+        return [line] + halving_markers + [all_time_high_markers, cycle_high_markers, cycle_low_markers]
 
     def update(frame):
         """Update the plot with each new frame for the animation."""
@@ -134,13 +143,14 @@ def animate_spiral_chart(df, duration=10, fps=60, pause_duration=1):
         # Update the price line incrementally
         line.set_data(df['Theta'][:max_index], r[:max_index])
 
-        # Display all halving markers incrementally
-        halving_dates_filtered = df.index[df.index.isin(halving_dates) & (df.index <= df.index[max_index])]
-        if not halving_dates_filtered.empty:
-            halving_r = np.log10(df.loc[halving_dates_filtered, 'Close'])
-            halving_theta = df.loc[halving_dates_filtered, 'Theta']
-            halving_markers.set_data(np.concatenate([halving_markers.get_xdata(), halving_theta]),
-                                     np.concatenate([halving_markers.get_ydata(), halving_r]))
+        # Display halving markers incrementally for each halving event
+        for i, halving_date in enumerate(halving_dates):
+            if df.index[max_index] >= halving_date:  # Show the marker when time reaches the halving date
+                halving_r = np.log10(df.loc[halving_date, 'Close'])
+                halving_theta = df.loc[halving_date, 'Theta']
+                halving_markers[i].set_data([halving_theta], [halving_r])
+            else:
+                halving_markers[i].set_data([], [])  # Hide the marker if not reached yet
 
         # Display all-time highs incrementally
         ath_dates_filtered = df.index[df.index.isin(all_time_highs.index) & (df.index <= df.index[max_index])]
@@ -163,7 +173,7 @@ def animate_spiral_chart(df, duration=10, fps=60, pause_duration=1):
             cycle_low_theta = df.loc[cycle_low_dates_filtered, 'Theta']
             cycle_low_markers.set_data(cycle_low_theta, cycle_low_r)
 
-        return line, halving_markers, all_time_high_markers, cycle_high_markers, cycle_low_markers
+        return [line] + halving_markers + [all_time_high_markers, cycle_high_markers, cycle_low_markers]
 
     # Create the animation
     ani = FuncAnimation(
@@ -178,7 +188,6 @@ def animate_spiral_chart(df, duration=10, fps=60, pause_duration=1):
     # Show the plot
     plt.show()
 
-
 # Define auxiliary functions
 def _days_since_halving(date, halving_dates):
     past_halvings = [halving for halving in halving_dates if halving <= date]
@@ -192,7 +201,7 @@ def _calculate_theta(date, halving_dates, fixed_halving):
     return (-2 * np.pi * days_since_fixed_halving / 1458) + (np.pi / 2)
 
 def _create_polar_plot(df, halving_dates, fixed_halving):
-    fig = plt.figure(figsize=(10, 10))
+    fig = plt.figure(figsize=(13, 10))
     ax = fig.add_subplot(111, projection='polar')
     r = np.log10(df['Close'])
     ax.set_title('Bitcoin Price Spiral', va='bottom')
