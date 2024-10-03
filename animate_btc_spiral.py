@@ -121,7 +121,7 @@ def animate_spiral_chart(df, duration=10, fps=60, pause_duration=1):
     cycle_low_markers, = ax.plot([], [], 'ro', markersize=10, label='Cycle Low')
 
     # Add a legend with all the markers
-    ax.legend(loc='upper left', bbox_to_anchor=(-0.2, 1))
+    ax.legend(loc='upper left', bbox_to_anchor=(-0.3, 1))
 
     # Convert price to log10 for scaling
     r = np.log10(df['Close'])
@@ -201,7 +201,7 @@ def _calculate_theta(date, halving_dates, fixed_halving):
     return (-2 * np.pi * days_since_fixed_halving / 1458) + (np.pi / 2)
 
 def _create_polar_plot(df, halving_dates, fixed_halving):
-    fig = plt.figure(figsize=(13, 10))
+    fig = plt.figure(figsize=(16, 12))
     ax = fig.add_subplot(111, projection='polar')
     r = np.log10(df['Close'])
     ax.set_title('Bitcoin Price Spiral', va='bottom')
