@@ -65,11 +65,12 @@ all_time_highs = df[df['Close'] == df['Close'].cummax()]
 cycle_highs = df.loc[df.index.isin([df.loc[halving_dates[i-1]:halving_dates[i]]['Close'].idxmax() for i in range(1, len(halving_dates))])]
 cycle_lows = df.loc[df.index.isin([df.loc[halving_dates[i-1]:halving_dates[i]]['Close'].idxmin() for i in range(1, len(halving_dates))])]
 
-def animate_spiral_chart(df, duration=10, fps=60, pause_duration=1):
+def animate_spiral_chart(df, duration=30, fps=60, pause_duration=2):
     """
     Creates an animated spiral chart of Bitcoin prices with respect to halving events.
     The animation shows the series gradually being plotted, with a pause at the last frame before restarting.
     Includes a legend for halving events, all-time highs, cycle highs, and cycle lows.
+    Displays live price and date dynamically during the animation.
     
     Args:
     df (pd.DataFrame): DataFrame with datetime index and 'Close' column representing daily Bitcoin prices.
@@ -117,7 +118,7 @@ def animate_spiral_chart(df, duration=10, fps=60, pause_duration=1):
 
     # Initialize markers for other key points
     all_time_high_markers, = ax.plot([], [], 'bo', markersize=10, markerfacecolor='none', label='All-Time High')
-    cycle_high_markers, = ax.plot([], [], '^', markersize=10, color='orange', label='Cycle High')  
+    cycle_high_markers, = ax.plot([], [], '^', markersize=10, color='orange', label='Cycle High')
     cycle_low_markers, = ax.plot([], [], 'ro', markersize=10, label='Cycle Low')
 
     # Add a legend with all the markers
@@ -125,6 +126,19 @@ def animate_spiral_chart(df, duration=10, fps=60, pause_duration=1):
 
     # Convert price to log10 for scaling
     r = np.log10(df['Close'])
+
+    # Add text to display live price and date
+    price_text = ax.text(0.02, 0.95, '', transform=ax.transAxes, fontsize=12, color='black', 
+                         bbox=dict(facecolor='white', alpha=0.8))
+    
+    def format_price(value):
+        """Format price into human-readable format."""
+        if value >= 1e6:
+            return f'${value / 1e6:.0f}M'
+        elif value >= 1e3:
+            return f'${value / 1e3:.0f}k'
+        else:
+            return f'${value:.0f}'
 
     def init():
         """Initialize the background of the plot."""
@@ -134,7 +148,8 @@ def animate_spiral_chart(df, duration=10, fps=60, pause_duration=1):
         all_time_high_markers.set_data([], [])
         cycle_high_markers.set_data([], [])
         cycle_low_markers.set_data([], [])
-        return [line] + halving_markers + [all_time_high_markers, cycle_high_markers, cycle_low_markers]
+        price_text.set_text('')  # Initialize with no text
+        return [line] + halving_markers + [all_time_high_markers, cycle_high_markers, cycle_low_markers, price_text]
 
     def update(frame):
         """Update the plot with each new frame for the animation."""
@@ -143,6 +158,12 @@ def animate_spiral_chart(df, duration=10, fps=60, pause_duration=1):
         # Update the price line incrementally
         line.set_data(df['Theta'][:max_index], r[:max_index])
 
+        # Update live price and date text
+        current_date = df.index[max_index].strftime('%Y-%m-%d')
+        current_price = df['Close'].iloc[max_index]
+        formatted_price = format_price(current_price)  # Format the price
+        price_text.set_text(f'Date: {current_date}\nPrice: {formatted_price}')
+        
         # Display halving markers incrementally for each halving event
         for i, halving_date in enumerate(halving_dates):
             if df.index[max_index] >= halving_date:  # Show the marker when time reaches the halving date
@@ -173,7 +194,7 @@ def animate_spiral_chart(df, duration=10, fps=60, pause_duration=1):
             cycle_low_theta = df.loc[cycle_low_dates_filtered, 'Theta']
             cycle_low_markers.set_data(cycle_low_theta, cycle_low_r)
 
-        return [line] + halving_markers + [all_time_high_markers, cycle_high_markers, cycle_low_markers]
+        return [line] + halving_markers + [all_time_high_markers, cycle_high_markers, cycle_low_markers, price_text]
 
     # Create the animation
     ani = FuncAnimation(
@@ -233,4 +254,4 @@ def _set_theta_labels(ax):
     theta_tick_labels[3].set_y(-0.01)
 
 # Call the function to create and animate the spiral chart with dynamic markers and legend
-animate_spiral_chart(df, duration=10, fps=60, pause_duration=1)
+animate_spiral_chart(df, duration=30, fps=60, pause_duration=2)
