@@ -130,7 +130,7 @@ def animate_spiral_chart(df, duration=30, fps=60, pause_duration=2):
     r = np.log10(df['Close'])
 
     # Add text to display live price and date with larger font and box, positioned in the bottom-right corner
-    price_text = ax.text(1, 0, '', transform=ax.transAxes, fontsize=28, color='black',  # Larger fontsize
+    price_text = ax.text(1.25, -0.05, '', transform=ax.transAxes, fontsize=28, color='black',  # Larger fontsize
                      verticalalignment='bottom', horizontalalignment='right',  # Align text in bottom-right corner
                      bbox=dict(facecolor='white', alpha=0.9, pad=10))  # Larger padding for visibility
 
