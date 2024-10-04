@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os  # Import os to handle directory operations
 from datetime import datetime
 from coinmetrics.api_client import CoinMetricsClient
 import logging
@@ -121,16 +122,18 @@ def animate_spiral_chart(df, duration=30, fps=60, pause_duration=2):
     cycle_high_markers, = ax.plot([], [], '^', markersize=10, color='orange', label='Cycle High')
     cycle_low_markers, = ax.plot([], [], 'ro', markersize=10, label='Cycle Low')
 
-    # Add a legend with all the markers
-    ax.legend(loc='upper left', bbox_to_anchor=(-0.3, 1))
+    # Add a legend with all the markers and place it in the absolute top-left corner of the figure
+    fig.legend(loc='upper left', bbox_to_anchor=(0, 1), fontsize=22, markerscale=2, frameon=False)
+
 
     # Convert price to log10 for scaling
     r = np.log10(df['Close'])
 
-    # Add text to display live price and date
-    price_text = ax.text(0.02, 0.95, '', transform=ax.transAxes, fontsize=12, color='black', 
-                         bbox=dict(facecolor='white', alpha=0.8))
-    
+    # Add text to display live price and date with larger font and box, positioned in the bottom-right corner
+    price_text = ax.text(1, 0, '', transform=ax.transAxes, fontsize=28, color='black',  # Larger fontsize
+                     verticalalignment='bottom', horizontalalignment='right',  # Align text in bottom-right corner
+                     bbox=dict(facecolor='white', alpha=0.9, pad=10))  # Larger padding for visibility
+
     def format_price(value):
         """Format price into human-readable format."""
         if value >= 1e6:
@@ -196,15 +199,20 @@ def animate_spiral_chart(df, duration=30, fps=60, pause_duration=2):
 
         return [line] + halving_markers + [all_time_high_markers, cycle_high_markers, cycle_low_markers, price_text]
 
+    # Create the 'gifs' folder if it doesn't exist
+    gif_folder = "gifs"
+    if not os.path.exists(gif_folder):
+        os.makedirs(gif_folder)
+
     # Create the animation
     ani = FuncAnimation(
         fig, update, frames=len(df) + pause_frames, init_func=init, blit=True, interval=1000/fps, repeat=True
     )
 
-    # Save the animation as a GIF
+    # Save the animation as a GIF in the 'gifs' folder
     current_date = datetime.now().strftime("%b_%d_%H_%M").lower()  # Includes hours and minutes
-    filename = f"spiral_chart_{current_date}.gif"
-    ani.save(filename, writer=PillowWriter(fps=fps))
+    filename = os.path.join(gif_folder, f"spiral_chart_{current_date}.gif")  # Save in 'gifs' folder
+    ani.save(filename, writer=PillowWriter(fps=fps), dpi=72) # Lower DPI for smaller size
 
     # Show the plot
     plt.show()
@@ -224,6 +232,10 @@ def _calculate_theta(date, halving_dates, fixed_halving):
 def _create_polar_plot(df, halving_dates, fixed_halving):
     fig = plt.figure(figsize=(16, 12))
     ax = fig.add_subplot(111, projection='polar')
+    
+    # Adjust the layout to center the spiral
+    plt.subplots_adjust(left=0.15, right=0.85, top=0.85, bottom=0.15)  # Adjust the values as needed
+
     r = np.log10(df['Close'])
     ax.set_title('Bitcoin Price Spiral', va='bottom')
     ax.grid(True)
@@ -231,6 +243,7 @@ def _create_polar_plot(df, halving_dates, fixed_halving):
     ax.yaxis.set_major_formatter(FuncFormatter(_price_formatter))
     _set_theta_labels(ax)
     return fig, ax
+
 
 def _price_formatter(x, pos):
     real_value = 10**x
@@ -246,12 +259,24 @@ def _set_theta_labels(ax):
     years_180 = [2011 + 4 * i for i in range(5)]
     years_270 = [2010 + 4 * i for i in range(5)]
     years_360 = [2009 + 4 * i for i in range(5)]
-    ax.set_thetagrids([0, 90, 180, 270], labels=[years_360, years_90, years_180, years_270])
+    
+    # Set the theta grid labels
+    ax.set_thetagrids([0, 90, 180, 270], labels=[years_360, years_90, years_180, years_270], fontsize=16) 
+    
+    # Adjust specific label positions
     theta_tick_labels = ax.get_xticklabels()
-    theta_tick_labels[0].set_y(-0.3)
-    theta_tick_labels[2].set_y(-0.3)
+    
+    # Adjust 0° label (first label)
+    theta_tick_labels[0].set_y(-0.5)  # Move it down
+    theta_tick_labels[0].set_x(0.01)  # Add horizontal padding
+    
+    # Adjust 180° label (third label)
+    theta_tick_labels[2].set_y(-0.5)  # Move it down
+    theta_tick_labels[2].set_x(-0.01)  # Add horizontal padding
+    
+    # Adjust 90° and 270°
     theta_tick_labels[1].set_y(-0.01)
     theta_tick_labels[3].set_y(-0.01)
 
 # Call the function to create and animate the spiral chart with dynamic markers and legend
-animate_spiral_chart(df, duration=30, fps=60, pause_duration=2)
+animate_spiral_chart(df, duration=10, fps=15, pause_duration=2)
