@@ -128,11 +128,12 @@ def animate_spiral_chart(df, duration=30, fps=60, pause_duration=2):
 
     # Convert price to log10 for scaling
     r = np.log10(df['Close'])
+    
+    # Adjust the position to bring it closer to the spiral
+    price_text = ax.text(1, 0.05, '', transform=ax.transAxes, fontsize=28, color='black',  
+                     verticalalignment='bottom', horizontalalignment='left',  
+                     bbox=dict(facecolor='white', alpha=0.9, pad=10))  
 
-    # Add text to display live price and date with larger font and box, positioned in the bottom-right corner
-    price_text = ax.text(1.25, -0.05, '', transform=ax.transAxes, fontsize=28, color='black',  # Larger fontsize
-                     verticalalignment='bottom', horizontalalignment='right',  # Align text in bottom-right corner
-                     bbox=dict(facecolor='white', alpha=0.9, pad=10))  # Larger padding for visibility
 
     def format_price(value):
         """Format price into human-readable format."""
