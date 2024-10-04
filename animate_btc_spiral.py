@@ -229,6 +229,7 @@ def _calculate_theta(date, halving_dates, fixed_halving):
     days_since_fixed_halving = (date - fixed_halving).days
     return (-2 * np.pi * days_since_fixed_halving / 1458) + (np.pi / 2)
 
+
 def _create_polar_plot(df, halving_dates, fixed_halving):
     fig = plt.figure(figsize=(16, 12))
     ax = fig.add_subplot(111, projection='polar')
@@ -237,13 +238,19 @@ def _create_polar_plot(df, halving_dates, fixed_halving):
     plt.subplots_adjust(left=0.15, right=0.85, top=0.85, bottom=0.15)  # Adjust the values as needed
 
     r = np.log10(df['Close'])
-    ax.set_title('Bitcoin Price Spiral', va='bottom', fontsize=24)
+    
+    # Increase the title font size
+    ax.set_title('Bitcoin Price Spiral', va='bottom', fontsize=32)  # Increased title font size
+    
     ax.grid(True)
-    ax.set_rticks([0, 1, 2, 3, 4, 5, 6])
+    ax.set_rticks([0, 1, 2, 3, 4, 5, 6])  # Radial ticks at the log-scale prices
     ax.yaxis.set_major_formatter(FuncFormatter(_price_formatter))
+    
+    # Increase the font size for the radial axis (prices like $1, $10, etc.)
+    ax.tick_params(axis='y', labelsize=16)  # Set the label size for radial axis labels
+    
     _set_theta_labels(ax)
     return fig, ax
-
 
 def _price_formatter(x, pos):
     real_value = 10**x
