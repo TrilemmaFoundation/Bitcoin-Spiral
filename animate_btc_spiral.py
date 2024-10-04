@@ -237,7 +237,7 @@ def _create_polar_plot(df, halving_dates, fixed_halving):
     plt.subplots_adjust(left=0.15, right=0.85, top=0.85, bottom=0.15)  # Adjust the values as needed
 
     r = np.log10(df['Close'])
-    ax.set_title('Bitcoin Price Spiral', va='bottom')
+    ax.set_title('Bitcoin Price Spiral', va='bottom', fontsize=24)
     ax.grid(True)
     ax.set_rticks([0, 1, 2, 3, 4, 5, 6])
     ax.yaxis.set_major_formatter(FuncFormatter(_price_formatter))
@@ -267,16 +267,17 @@ def _set_theta_labels(ax):
     theta_tick_labels = ax.get_xticklabels()
     
     # Adjust 0° label (first label)
-    theta_tick_labels[0].set_y(-0.5)  # Move it down
-    theta_tick_labels[0].set_x(0.01)  # Add horizontal padding
+    theta_tick_labels[0].set_y(-0.4)  # Reduced the vertical padding to move it up
+    theta_tick_labels[0].set_x(0.007)  # Adjusted horizontal padding slightly
     
     # Adjust 180° label (third label)
-    theta_tick_labels[2].set_y(-0.5)  # Move it down
-    theta_tick_labels[2].set_x(-0.01)  # Add horizontal padding
+    theta_tick_labels[2].set_y(-0.4)  # Reduced the vertical padding to move it up
+    theta_tick_labels[2].set_x(-0.007)  # Adjusted horizontal padding slightly
     
     # Adjust 90° and 270°
-    theta_tick_labels[1].set_y(-0.01)
-    theta_tick_labels[3].set_y(-0.01)
+    theta_tick_labels[1].set_y(-0.01)  # Same vertical position for 90°
+    theta_tick_labels[3].set_y(-0.01)  # Same vertical position for 270°
+
 
 # Call the function to create and animate the spiral chart with dynamic markers and legend
 animate_spiral_chart(df, duration=10, fps=15, pause_duration=2)
