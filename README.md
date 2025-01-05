@@ -1,5 +1,5 @@
 # Bitcoin-Spiral
-A Python script to recreate the famous Bitcoin Spiral Chart in a Jupyter notebook.
+A Python script to recreate the famous Bitcoin Spiral Chart in a Jupyter notebook. Plus a script for animating the visualization.
 
 ## Introduction
 This is currently my favorite Bitcoin chart. 
