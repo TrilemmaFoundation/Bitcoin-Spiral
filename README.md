@@ -11,3 +11,9 @@ You’ve probably seen this chart before, but use this repo as an opportunity to
 - Watch this youtube video for an overview of the chart: [Cycle Analysis w/Rational Root - Bitcoin 2023](https://youtu.be/AsT55mpG_G0?si=GOVr_h4TSF5Aoi9l) 
 
 This visualization is meant to serve as a baseline for you to expand upon. Think about the patterns and trends that emerge, like the fact that no crossings have taken place as of Sep 26, 2024, and what this property could imply for the future.
+
+## 🔄 Bitcoin Spiral × Stacking Sats
+
+![Bitcoin Spiral Animation](https://raw.githubusercontent.com/TrilemmaFoundation/Bitcoin-Spiral/main/btc_spiral_animation.gif)
+
+A dynamic visualization for our Bitcoin Accumulation models using the Bitcoin Spiral, illustrating how our strategies evolve over time.
